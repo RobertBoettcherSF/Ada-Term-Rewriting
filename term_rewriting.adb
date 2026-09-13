@@ -337,6 +337,7 @@ package body Term_Rewriting is
    is
       Result    : Term := T;
       Rewritten : Boolean;
+      pragma Unreferenced (Rewritten);
    begin
       Rewrite_Recursive (Result.AST, Result.AST.First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
       return Result;
