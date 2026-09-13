@@ -1,6 +1,9 @@
 with Ada.Containers.Indefinite_Ordered_Sets;
+with Ada.Containers;
 
 package body Term_Rewriting is
+
+   use type Ada.Containers.Count_Type;
 
    -- Local set package for rule variable validation
    package String_Sets is new Ada.Containers.Indefinite_Ordered_Sets (String);
@@ -48,13 +51,13 @@ package body Term_Rewriting is
          Before   => No_Element,
          New_Item => Node_Type'(Function_Node, To_Unbounded_String (Name)));
 
-      Root_Cur := Result.AST.First_Child (Result.AST.Root);
+      Root_Cur := First_Child (Result.AST.Root);
 
       for I in Args'Range loop
          Result.AST.Copy_Subtree
            (Parent => Root_Cur,
             Before => No_Element,
-            Source => Args (I).AST.First_Child (Args (I).AST.Root));
+            Source => First_Child (Args (I).AST.Root));
       end loop;
 
       return Result;
@@ -94,7 +97,7 @@ package body Term_Rewriting is
    -----------------
    function Create_Rule (Lhs : Term; Rhs : Term) return Rule is
       use Term_Trees;
-      Lhs_Root : constant Cursor := Lhs.AST.First_Child (Lhs.AST.Root);
+      Lhs_Root : constant Cursor := First_Child (Lhs.AST.Root);
       Lhs_Vars, Rhs_Vars : String_Sets.Set;
    begin
       if not Has_Element (Lhs_Root) then
@@ -106,7 +109,7 @@ package body Term_Rewriting is
       end if;
 
       Collect_Variables (Lhs_Root, Lhs_Vars);
-      Collect_Variables (Rhs.AST.First_Child (Rhs.AST.Root), Rhs_Vars);
+      Collect_Variables (First_Child (Rhs.AST.Root), Rhs_Vars);
 
       if not Rhs_Vars.Is_Subset (Lhs_Vars) then
          raise Invalid_Rule_Error with "Variables in RHS must be a subset of LHS.";
@@ -146,8 +149,9 @@ package body Term_Rewriting is
    -- To_String --
    ---------------
    function To_String (T : Term) return String is
+      use Term_Trees;
    begin
-      return To_String_Cursor (T.AST.First_Child (T.AST.Root));
+      return To_String_Cursor (First_Child (T.AST.Root));
    end To_String;
 
    ------------------------
@@ -234,8 +238,8 @@ package body Term_Rewriting is
                   Container.Copy_Subtree
                     (Parent => Parent_Cur,
                      Before => C,
-                     Source => New_Term.AST.First_Child (New_Term.AST.Root));
-                  Container.Delete_Tree (Temp_C);
+                     Source => First_Child (New_Term.AST.Root));
+                  Container.Delete_Subtree (Temp_C);
                end;
             end if;
          end;
@@ -271,7 +275,7 @@ package body Term_Rewriting is
       begin
          for R of Rules loop
             Sub.Clear;
-            Match_Tree_Cursors (R.Lhs.AST.First_Child (R.Lhs.AST.Root), C, Sub, Success);
+            Match_Tree_Cursors (First_Child (R.Lhs.AST.Root), C, Sub, Success);
             
             if Success then
                declare
@@ -279,14 +283,14 @@ package body Term_Rewriting is
                   New_Term   : Term := R.Rhs;
                   Temp_C     : Cursor := C;
                begin
-                  Apply_Substitution (New_Term.AST, New_Term.AST.First_Child (New_Term.AST.Root), Sub);
+                  Apply_Substitution (New_Term.AST, First_Child (New_Term.AST.Root), Sub);
 
                   Container.Copy_Subtree
                     (Parent => Parent_Cur,
                      Before => C,
-                     Source => New_Term.AST.First_Child (New_Term.AST.Root));
+                     Source => First_Child (New_Term.AST.Root));
                      
-                  Container.Delete_Tree (Temp_C);
+                  Container.Delete_Subtree (Temp_C);
                   Rewritten := True;
                end;
                return;
@@ -338,8 +342,9 @@ package body Term_Rewriting is
       Result    : Term := T;
       Rewritten : Boolean;
       pragma Unreferenced (Rewritten);
+      use Term_Trees;
    begin
-      Rewrite_Recursive (Result.AST, Result.AST.First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
+      Rewrite_Recursive (Result.AST, First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
       return Result;
    end Rewrite_Step;
 
@@ -355,13 +360,14 @@ package body Term_Rewriting is
       Result    : Term := T;
       Rewritten : Boolean := True;
       Steps     : Step_Count := 0;
+      use Term_Trees;
    begin
       while Rewritten loop
          if Steps >= Max_Steps then
             raise Limit_Exceeded_Error with "Max steps exceeded during normalization";
          end if;
          
-         Rewrite_Recursive (Result.AST, Result.AST.First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
+         Rewrite_Recursive (Result.AST, First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
          
          if Rewritten then
             Steps := Steps + 1;
