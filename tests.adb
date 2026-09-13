@@ -19,7 +19,7 @@ procedure Tests is
    -- Helper variables
    X, Y, Z : Term;
    A, B, C : Term;
-   F_XY, G_A, Add_Term : Term;
+   F_XY, G_A : Term;
 begin
    Put_Line ("=== Term Rewriting Test Suite ===");
 
@@ -54,7 +54,8 @@ begin
    Put_Line ("TEST 4 — Rule Validation (LHS Variable)");
    begin
       declare
-         Dummy : Rule := Create_Rule (Create_Variable ("v"), Create_Constant ("A"));
+         Dummy : constant Rule := Create_Rule (Create_Variable ("v"), Create_Constant ("A"));
+         pragma Unreferenced (Dummy);
       begin
          Check ("4.1 LHS Variable must raise", False);
       end;
@@ -69,7 +70,8 @@ begin
    Put_Line ("TEST 5 — Rule Validation (RHS Unbound Variable)");
    begin
       declare
-         Dummy : Rule := Create_Rule (Create_Constant ("C"), Create_Variable ("u"));
+         Dummy : constant Rule := Create_Rule (Create_Constant ("C"), Create_Variable ("u"));
+         pragma Unreferenced (Dummy);
       begin
          Check ("5.1 RHS unbound variable must raise", False);
       end;
@@ -83,9 +85,9 @@ begin
    -- TEST 6: Valid Rule Creation
    Put_Line ("TEST 6 — Valid Rule Creation");
    declare
-      Valid_Rule : Rule;
+      Valid_Rule : constant Rule := Create_Rule (F_XY, X); -- f(x, y) -> x
+      pragma Unreferenced (Valid_Rule);
    begin
-      Valid_Rule := Create_Rule (F_XY, X); -- f(x, y) -> x
       Check ("6.1 Valid rule creation succeeded", True);
       Check ("6.2 Valid rule does not crash", True);
       Check ("6.3 Valid rule structure", True);
@@ -94,23 +96,23 @@ begin
    -- Setup Rules for Rewriting tests
    declare
       -- Rule 1: id(x) -> x
-      Id_Lhs  : Term := Create_Function ("id", [Create_Variable ("x")]);
-      Id_Rhs  : Term := Create_Variable ("x");
-      Rule_Id : Rule := Create_Rule (Id_Lhs, Id_Rhs);
+      Id_Lhs  : constant Term := Create_Function ("id", [Create_Variable ("x")]);
+      Id_Rhs  : constant Term := Create_Variable ("x");
+      Rule_Id : constant Rule := Create_Rule (Id_Lhs, Id_Rhs);
 
       -- Rule 2: add(Z, x) -> x
-      Add_Lhs1 : Term := Create_Function ("add", [Create_Constant ("Z"), Create_Variable ("x")]);
-      Add_Rhs1 : Term := Create_Variable ("x");
-      Rule_A1  : Rule := Create_Rule (Add_Lhs1, Add_Rhs1);
+      Add_Lhs1 : constant Term := Create_Function ("add", [Create_Constant ("Z"), Create_Variable ("x")]);
+      Add_Rhs1 : constant Term := Create_Variable ("x");
+      Rule_A1  : constant Rule := Create_Rule (Add_Lhs1, Add_Rhs1);
 
       -- Rule 3: add(S(x), y) -> S(add(x, y))
-      Add_Lhs2 : Term := Create_Function ("add", [Create_Function ("S", [Create_Variable ("x")]), Create_Variable ("y")]);
-      Add_Rhs2 : Term := Create_Function ("S", [Create_Function ("add", [Create_Variable ("x"), Create_Variable ("y")])]);
-      Rule_A2  : Rule := Create_Rule (Add_Lhs2, Add_Rhs2);
+      Add_Lhs2 : constant Term := Create_Function ("add", [Create_Function ("S", [Create_Variable ("x")]), Create_Variable ("y")]);
+      Add_Rhs2 : constant Term := Create_Function ("S", [Create_Function ("add", [Create_Variable ("x"), Create_Variable ("y")])]);
+      Rule_A2  : constant Rule := Create_Rule (Add_Lhs2, Add_Rhs2);
 
-      Rules : Rule_Array := [Rule_Id, Rule_A1, Rule_A2];
+      Rules : constant Rule_Array := [Rule_Id, Rule_A1, Rule_A2];
 
-      T1, T2, T3 : Term;
+      T1, T2 : Term;
    begin
       -- TEST 7: Single Rewrite Step (Root Match)
       Put_Line ("TEST 7 — Single Rewrite Step (Root Match)");
@@ -133,10 +135,10 @@ begin
       -- Term: f(g(A))
       Put_Line ("TEST 9 — Rewriting Strategy Distinctions");
       declare
-         Strat_R1 : Rule := Create_Rule (Create_Function ("f", [Create_Variable ("x")]), Create_Constant ("C"));
-         Strat_R2 : Rule := Create_Rule (Create_Function ("g", [Create_Variable ("x")]), Create_Variable ("x"));
-         Strat_Rules : Rule_Array := [Strat_R1, Strat_R2];
-         Strat_Term : Term := Create_Function ("f", [Create_Function ("g", [Create_Constant ("A")])]);
+         Strat_R1 : constant Rule := Create_Rule (Create_Function ("f", [Create_Variable ("x")]), Create_Constant ("C"));
+         Strat_R2 : constant Rule := Create_Rule (Create_Function ("g", [Create_Variable ("x")]), Create_Variable ("x"));
+         Strat_Rules : constant Rule_Array := [Strat_R1, Strat_R2];
+         Strat_Term : constant Term := Create_Function ("f", [Create_Function ("g", [Create_Constant ("A")])]);
          Res_Outer, Res_Inner : Term;
       begin
          Res_Outer := Rewrite_Step (Strat_Term, Strat_Rules, Outermost);
@@ -151,9 +153,9 @@ begin
       -- Rule: dup(x, x) -> x. Target: dup(A, B).
       Put_Line ("TEST 10 — Non-Linear Pattern Matching");
       declare
-         Dup_Lhs : Term := Create_Function ("dup", [Create_Variable ("x"), Create_Variable ("x")]);
-         Dup_Rhs : Term := Create_Variable ("x");
-         Rule_Dup : Rule := Create_Rule (Dup_Lhs, Dup_Rhs);
+         Dup_Lhs : constant Term := Create_Function ("dup", [Create_Variable ("x"), Create_Variable ("x")]);
+         Dup_Rhs : constant Term := Create_Variable ("x");
+         Rule_Dup : constant Rule := Create_Rule (Dup_Lhs, Dup_Rhs);
          T_Dup    : Term := Create_Function ("dup", [Create_Constant ("A"), Create_Constant ("B")]);
          Res_Dup  : Term;
       begin
@@ -182,10 +184,11 @@ begin
       -- Loop rule: loop(x) -> loop(x)
       Put_Line ("TEST 12 — Normalization Max Steps Exception");
       declare
-         Loop_Term : Term := Create_Function ("loop", [Create_Variable ("x")]);
-         Rule_Loop : Rule := Create_Rule (Loop_Term, Loop_Term);
-         T_Loop    : Term := Create_Function ("loop", [Create_Constant ("A")]);
+         Loop_Term : constant Term := Create_Function ("loop", [Create_Variable ("x")]);
+         Rule_Loop : constant Rule := Create_Rule (Loop_Term, Loop_Term);
+         T_Loop    : constant Term := Create_Function ("loop", [Create_Constant ("A")]);
          Res_Loop  : Term;
+         pragma Unreferenced (Res_Loop);
       begin
          Res_Loop := Normalize (T_Loop, [Rule_Loop], Outermost, 5);
          Check ("12.1 Limit exception should raise", False);
@@ -199,11 +202,11 @@ begin
       -- TEST 13: Complex Nested Structural Replacement
       Put_Line ("TEST 13 — Complex Nested Replacements");
       declare
-         Complex_Lhs : Term := Create_Function ("nested", [Create_Variable ("x"), Create_Variable ("y")]);
-         Complex_Rhs : Term := Create_Function ("pair", [Create_Variable ("y"), Create_Variable ("x")]);
-         Complex_Rule : Rule := Create_Rule (Complex_Lhs, Complex_Rhs);
+         Complex_Lhs : constant Term := Create_Function ("nested", [Create_Variable ("x"), Create_Variable ("y")]);
+         Complex_Rhs : constant Term := Create_Function ("pair", [Create_Variable ("y"), Create_Variable ("x")]);
+         Complex_Rule : constant Rule := Create_Rule (Complex_Lhs, Complex_Rhs);
          
-         T_In : Term := Create_Function ("nested", [Create_Function ("A", Term_Array'[]), Create_Function ("B", Term_Array'[])]);
+         T_In : constant Term := Create_Function ("nested", [Create_Function ("A", Term_Array'[]), Create_Function ("B", Term_Array'[])]);
          T_Out : Term;
       begin
          T_Out := Rewrite_Step (T_In, [Complex_Rule], Outermost);
