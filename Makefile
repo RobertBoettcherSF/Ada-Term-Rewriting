@@ -1,19 +1,17 @@
-GNAT    := gnatmake
-FLAGS   := -gnatwa -gnat2022
-OBJ_DIR := obj
-BIN_DIR := bin
+GNAT = gnatmake
+FLAGS = -gnatwa -gnat2022
 
 .PHONY: all test clean
 
-all: $(BIN_DIR)/tests
+all: bin/tests
 
-$(BIN_DIR)/tests: *.ads *.adb *.gpr
-	mkdir -p $(OBJ_DIR)$(BIN_DIR)
-	$(GNAT)$(FLAGS) -Pterm_rewriting.gpr
+bin/tests: *.ads *.adb *.gpr
+	mkdir -p obj bin
+	$(GNAT) $(FLAGS) -Pterm_rewriting.gpr
 
 test: all
 	@echo "Running tests..."
-	@$(BIN_DIR)/tests
+	@bin/tests
 
 clean:
-	rm -rf $(OBJ_DIR)$(BIN_DIR)
+	rm -rf obj bin
