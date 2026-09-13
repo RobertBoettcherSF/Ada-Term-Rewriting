@@ -28,8 +28,7 @@ package Term_Rewriting is
    type Term_Array is array (Argument_Index range <>) of Term;
 
    -- Structural Equality
-   function "=" (Left, Right : Term) return Boolean
-     with Post => (if Left = Right then True else False);
+   function "=" (Left, Right : Term) return Boolean;
 
    -- Substitution mapping (Variable Name -> Term)
    package Substitution_Maps is new Ada.Containers.Indefinite_Ordered_Maps
