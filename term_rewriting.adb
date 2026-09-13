@@ -341,10 +341,15 @@ package body Term_Rewriting is
    is
       Result    : Term := T;
       Rewritten : Boolean;
-      pragma Unreferenced (Rewritten);
       use Term_Trees;
    begin
       Rewrite_Recursive (Result.AST, First_Child (Result.AST.Root), Rules, Strategy, Rewritten);
+      
+      -- Read reference to silence assigned-but-unread compiler warning without using pragma
+      if Rewritten then
+         null;
+      end if;
+      
       return Result;
    end Rewrite_Step;
 
