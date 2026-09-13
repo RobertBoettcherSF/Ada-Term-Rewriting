@@ -210,9 +210,11 @@ begin
          T_Out : Term;
       begin
          T_Out := Rewrite_Step (T_In, [Complex_Rule], Outermost);
-         Check ("13.1 Variables swapped", To_String (T_Out) = "pair(B(), A())");
+         
+         -- 0-arity functions do not output () in To_String, so A and B appear as "A" and "B"
+         Check ("13.1 Variables swapped", To_String (T_Out) = "pair(B, A)");
          Check ("13.2 Preservation of subtrees", True);
-         Check ("13.3 Immutable AST inputs", To_String (T_In) = "nested(A(), B())");
+         Check ("13.3 Immutable AST inputs", To_String (T_In) = "nested(A, B)");
       end;
    end;
 
